@@ -7,25 +7,25 @@ namespace LegendaryTools
 {
     public class PoolGameObject : PoolObject<GameObject>
     {
-        private readonly GameObject Original;
+        private readonly GameObject original;
 
         public PoolGameObject(GameObject original) : base()
         {
-            Original = original;
+            this.original = original;
         }
 
         protected override GameObject NewObject()
         {
-            if (Original != null)
+            if (original != null)
             {
-                GameObject obj = GameObject.Instantiate(Original);
-                obj.name = Original.name + " # " + (ActiveInstances.Count + InactiveInstances.Count);
+                GameObject obj = GameObject.Instantiate(original);
+                obj.name = original.name + " # " + (ActiveInstances.Count + InactiveInstances.Count);
 
                 GameObjectPoolReference reference = obj.GetComponent<GameObjectPoolReference>();
                 if (reference == null)
                 {
                     reference = obj.AddComponent<GameObjectPoolReference>();
-                    reference.PrefabID = Original.GetHashCode();
+                    reference.PrefabID = original.GetHashCode();
                 }
 
                 NotifyOnConstruct(obj);
@@ -77,18 +77,29 @@ namespace LegendaryTools
             
             base.Recycle(instance);
         }
+        
+        public override void RecycleAllActive()
+        {
+            for (int i = ActiveInstances.Count - 1; i >= 0; i--)
+            {
+                Recycle(ActiveInstances[i]);
+            }
+        }
 
+        /// <summary>
+        /// It deallocates all instances (active and inactive) of this Pool, literally destroying the objects.
+        /// </summary>
         public override void Clear()
         {
             List<GameObject> instances = new List<GameObject>(ActiveInstances.Count + InactiveInstances.Count);
             instances.AddRange(ActiveInstances);
             instances.AddRange(InactiveInstances);
             
-            for (int i = 0; i < instances.Count; i++)
+            foreach (GameObject t in instances)
             {
-                if (instances[i] != null)
+                if (t != null)
                 {
-                    Object.Destroy(instances[i]);
+                    Object.Destroy(t);
                 }
             }
             
@@ -98,11 +109,11 @@ namespace LegendaryTools
         private void NotifyOnConstruct(GameObject obj)
         {
             Component[] comps = obj.GetComponents<Component>();
-            for (int i = 0; i < comps.Length; i++)
+            foreach (Component t in comps)
             {
-                if (comps[i] is IPoolable)
+                if (t is IPoolable poolable)
                 {
-                    (comps[i] as IPoolable).OnConstruct();
+                    poolable.OnConstruct();
                 }
             }
         }
@@ -110,11 +121,11 @@ namespace LegendaryTools
         private void NotifyOnCreate(GameObject obj)
         {
             Component[] comps = obj.GetComponents<Component>();
-            for (int i = 0; i < comps.Length; i++)
+            foreach (Component t in comps)
             {
-                if (comps[i] is IPoolable)
+                if (t is IPoolable poolable)
                 {
-                    (comps[i] as IPoolable).OnCreate();
+                    poolable.OnCreate();
                 }
             }
         }
@@ -122,11 +133,11 @@ namespace LegendaryTools
         private void NotifyOnRecycle(GameObject obj)
         {
             Component[] comps = obj.GetComponents<Component>();
-            for (int i = 0; i < comps.Length; i++)
+            foreach (Component t in comps)
             {
-                if (comps[i] is IPoolable)
+                if (t is IPoolable poolable)
                 {
-                    (comps[i] as IPoolable).OnRecycle();
+                    poolable.OnRecycle();
                 }
             }
         }

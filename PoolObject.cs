@@ -27,6 +27,8 @@ namespace LegendaryTools
         public abstract System.Object Create();
 
         public abstract void Recycle(System.Object instance);
+
+        public abstract void RecycleAllActive();
         
         public abstract void Clear();
         public abstract void AddInstance(System.Object instance);
@@ -48,6 +50,9 @@ namespace LegendaryTools
         public static PoolObject<T> Instance;
         protected readonly List<T> ActiveInstances = new List<T>();
         protected readonly List<T> InactiveInstances = new List<T>();
+
+        public List<T> AllActiveInstances => new List<T>(ActiveInstances);
+        public List<T> AllInactiveInstances => new List<T>(InactiveInstances);
 
         public List<T> AllInstances
         {
@@ -107,6 +112,14 @@ namespace LegendaryTools
         {
             Recycle(instance as T);
         }
+
+        public override void RecycleAllActive()
+        {
+            for (int i = ActiveInstances.Count - 1; i >= 0; i--)
+            {
+                Recycle(ActiveInstances[i]);
+            }
+        }
         
         public virtual void Recycle(T instance)
         {
@@ -147,9 +160,9 @@ namespace LegendaryTools
 
         public void FillInstances(List<T> instances)
         {
-            for (int i = 0; i < instances.Count; i++)
+            foreach (T t in instances)
             {
-                AddInstance(instances[i] as T);
+                AddInstance(t as T);
             }
         }
 
