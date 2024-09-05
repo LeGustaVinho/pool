@@ -27,45 +27,70 @@ namespace LegendaryTools
                     reference = obj.AddComponent<GameObjectPoolReference>();
                     reference.PrefabID = original.GetHashCode();
                 }
-
-                NotifyOnConstruct(obj);
                 return obj;
             }
             
             throw new Exception("[PoolGameObject] -> Original prefab cannot be null.");
         }
 
-        public override GameObject CreateAs()
+        public override GameObject CreateAs(out bool wasConstructed)
         {
-            GameObject obj =  base.CreateAs();
+            GameObject obj =  base.CreateAs(out wasConstructed);
             obj.SetActive(true);
-            NotifyOnCreate(obj);
+            return obj;
+        }
+        
+        public GameObject CreateAsFor()
+        {
+            GameObject obj = CreateAs(out bool wasConstructed);
+            Transform objTransform = obj.transform;
+            if (wasConstructed)
+            {
+                NotifyOnConstruct(obj, objTransform.position, objTransform.rotation, objTransform.parent);
+            }
+            NotifyOnCreate(obj, objTransform.position, objTransform.rotation, objTransform.parent);
             return obj;
         }
 
-        public GameObject Create(Transform parent)
+        public GameObject CreateAsFor(Transform parent)
         {
-            GameObject obj = CreateAs();
-            obj.transform.SetParent(parent);
+            GameObject obj = CreateAs(out bool wasConstructed);
+            Transform objTransform = obj.transform;
+            objTransform.SetParent(parent);
+            if (wasConstructed)
+            {
+                NotifyOnConstruct(obj, objTransform.position, objTransform.rotation, objTransform.parent);
+            }
+            NotifyOnCreate(obj, objTransform.position, objTransform.rotation, objTransform.parent);
             return obj;
         }
         
-        public GameObject Create(Vector3 position, Quaternion rotation)
+        public GameObject CreateAsFor(Vector3 position, Quaternion rotation)
         {
-            GameObject obj = CreateAs();
+            GameObject obj = CreateAs(out bool wasConstructed);
             Transform objTransform = obj.transform;
             objTransform.position = position;
             objTransform.rotation = rotation;
+            if (wasConstructed)
+            {
+                NotifyOnConstruct(obj, objTransform.position, objTransform.rotation, objTransform.parent);
+            }
+            NotifyOnCreate(obj, objTransform.position, objTransform.rotation, objTransform.parent);
             return obj;
         }
         
-        public GameObject Create(Vector3 position, Quaternion rotation, Transform parent)
+        public GameObject CreateAsFor(Vector3 position, Quaternion rotation, Transform parent)
         {
-            GameObject obj = CreateAs();
+            GameObject obj = CreateAs(out bool wasConstructed);
             Transform objTransform = obj.transform;
             objTransform.SetParent(parent);
             objTransform.position = position;
             objTransform.rotation = rotation;
+            if (wasConstructed)
+            {
+                NotifyOnConstruct(obj, objTransform.position, objTransform.rotation, objTransform.parent);
+            }
+            NotifyOnCreate(obj, objTransform.position, objTransform.rotation, objTransform.parent);
             return obj;
         }
 
@@ -106,26 +131,28 @@ namespace LegendaryTools
             base.Clear();
         }
 
-        private void NotifyOnConstruct(GameObject obj)
+        private void NotifyOnConstruct(GameObject obj, Vector3 position, Quaternion rotation, Transform parent)
         {
             Component[] comps = obj.GetComponents<Component>();
             foreach (Component t in comps)
             {
-                if (t is IPoolable poolable)
+                if (t is IPoolableGameObject poolable)
                 {
                     poolable.OnConstruct();
+                    poolable.OnConstruct(position, rotation, parent);
                 }
             }
         }
 
-        private void NotifyOnCreate(GameObject obj)
+        private void NotifyOnCreate(GameObject obj, Vector3 position, Quaternion rotation, Transform parent)
         {
             Component[] comps = obj.GetComponents<Component>();
             foreach (Component t in comps)
             {
-                if (t is IPoolable poolable)
+                if (t is IPoolableGameObject poolable)
                 {
                     poolable.OnCreate();
+                    poolable.OnCreate(position, rotation, parent);
                 }
             }
         }

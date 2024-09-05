@@ -20,13 +20,13 @@ namespace LegendaryTools
             if (typeof(T).IsSameOrSubclass(typeof(Component)))
             {
                 PoolGameObject pool = CreateOrGetPool((prefab as Component).gameObject);
-                return pool.CreateAs().GetComponent<T>();
+                return pool.CreateAsFor().GetComponent<T>();
             }
 
             if (typeof(T).IsSameOrSubclass(typeof(GameObject)))
             {
                 PoolGameObject pool = CreateOrGetPool(prefab as GameObject);
-                return pool.Create() as T;
+                return pool.CreateAsFor() as T;
             }
 
             return null;
@@ -44,13 +44,13 @@ namespace LegendaryTools
             if (typeof(T).IsSameOrSubclass(typeof(Component)))
             {
                 PoolGameObject pool = CreateOrGetPool((prefab as Component).gameObject);
-                return pool.Create(parent).GetComponent<T>();
+                return pool.CreateAsFor(parent).GetComponent<T>();
             }
 
             if (typeof(T).IsSameOrSubclass(typeof(GameObject)))
             {
                 PoolGameObject pool = CreateOrGetPool(prefab as GameObject);
-                return pool.Create(parent) as T;
+                return pool.CreateAsFor(parent) as T;
             }
 
             return null;
@@ -68,13 +68,13 @@ namespace LegendaryTools
             if (typeof(T).IsSameOrSubclass(typeof(Component)))
             {
                 PoolGameObject pool = CreateOrGetPool((prefab as Component).gameObject);
-                return pool.Create(position, rotation).GetComponent<T>();
+                return pool.CreateAsFor(position, rotation).GetComponent<T>();
             }
 
             if (typeof(T).IsSameOrSubclass(typeof(GameObject)))
             {
                 PoolGameObject pool = CreateOrGetPool(prefab as GameObject);
-                return pool.Create(position, rotation) as T;
+                return pool.CreateAsFor(position, rotation) as T;
             }
 
             return null;
@@ -92,13 +92,13 @@ namespace LegendaryTools
             if (typeof(T).IsSameOrSubclass(typeof(Component)))
             {
                 PoolGameObject pool = CreateOrGetPool((prefab as Component).gameObject);
-                return pool.Create(position, rotation, parent).GetComponent<T>();
+                return pool.CreateAsFor(position, rotation, parent).GetComponent<T>();
             }
 
             if (typeof(T).IsSameOrSubclass(typeof(GameObject)))
             {
                 PoolGameObject pool = CreateOrGetPool(prefab as GameObject);
-                return pool.Create(position, rotation, parent) as T;
+                return pool.CreateAsFor(position, rotation, parent) as T;
             }
 
             return null;
@@ -128,7 +128,7 @@ namespace LegendaryTools
         public static T Construct<T>()
             where T : class
         {
-            return CreateOrGetPool<T>().CreateAs();
+            return CreateOrGetPool<T>().Create() as T;
         }
         
         public static void Dispose<T>(T instance)

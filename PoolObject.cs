@@ -4,15 +4,6 @@ using UnityEngine;
 
 namespace LegendaryTools
 {
-    public interface IPoolable
-    {
-        void OnConstruct();
-
-        void OnCreate();
-
-        void OnRecycle();
-    }
-
     public abstract class PoolObject
     {
         public bool CanAutoGenerateInstances { protected set; get; }
@@ -73,11 +64,20 @@ namespace LegendaryTools
 
         public override System.Object Create()
         {
-            return CreateAs();
+            T obj = CreateAs(out bool wasConstructed);
+
+            if (obj is IPoolable poolable)
+            {
+                if(wasConstructed) poolable.OnConstruct();
+                poolable.OnCreate();
+            }
+            
+            return obj;
         }
 
-        public virtual T CreateAs()
+        public virtual T CreateAs(out bool wasConstructed)
         {
+            wasConstructed = false;
             T newObject = default;
 
             if (InactiveInstances.Count > 0)
@@ -90,21 +90,11 @@ namespace LegendaryTools
                 if (CanAutoGenerateInstances)
                 {
                     newObject = NewObject();
-
-                    if (newObject is IPoolable poolable)
-                    {
-                        poolable.OnConstruct();
-                    }
+                    wasConstructed = true;
                 }
             }
 
             ActiveInstances.Add(newObject);
-
-            if (newObject is IPoolable poolable1)
-            {
-                poolable1.OnCreate();
-            }
-
             return newObject;
         }
 
